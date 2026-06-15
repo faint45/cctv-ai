@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工地告警推播設定</title>
+<style>
+  body { margin:0; font-family:-apple-system,"Microsoft JhengHei",sans-serif; background:#0e1117; color:#e6edf3;
+         display:flex; justify-content:center; padding:18px; }
+  .box { max-width:440px; width:100%; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:20px; margin-bottom:14px; }
+  h1 { font-size:21px; text-align:center; margin:6px 0; }
+  .sub { text-align:center; color:#8b949e; font-size:14px; margin-bottom:4px; }
+  .step { font-size:15px; font-weight:bold; color:#58a6ff; margin-bottom:8px; }
+  .store { display:flex; gap:10px; }
+  .store a { flex:1; text-align:center; background:#238636; border-radius:10px; padding:14px;
+             color:#fff; text-decoration:none; font-size:15px; font-weight:bold; }
+  .store a.ios { background:#0a84ff; }
+  .topic { font-family:monospace; font-size:19px; background:#0d1117; border:1px dashed #3fb950;
+           border-radius:8px; padding:14px; text-align:center; margin:10px 0; word-break:break-all; color:#3fb950; }
+  .copy { width:100%; background:#1f6feb; color:#fff; border:none; border-radius:8px; padding:13px; font-size:15px; cursor:pointer; }
+  ol { line-height:2; padding-left:22px; font-size:15px; }
+  .note { color:#8b949e; font-size:13px; line-height:1.6; }
+  .big { font-size:16px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="card" style="text-align:center">
+    <h1>🏗️ 拔林工地 AI 告警</h1>
+    <p class="sub">3 步驟,手機接收工地即時告警(含現場照片)</p>
+  </div>
+
+  <div class="card">
+    <div class="step">① 下載 ntfy App</div>
+    <div class="store">
+      <a class="ios" href="https://apps.apple.com/app/ntfy/id1625396347">🍎 iPhone 下載</a>
+      <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">🤖 Android 下載</a>
+    </div>
+    <p class="note" style="margin-top:8px">(免費 App,不需註冊帳號)</p>
+  </div>
+
+  <div class="card">
+    <div class="step">② 複製訂閱主題</div>
+    <div class="topic" id="topic">allen-site-k7x9q2m4v</div>
+    <button class="copy" onclick="navigator.clipboard.writeText('allen-site-k7x9q2m4v');this.textContent='✓ 已複製,請開 ntfy App'">📋 複製主題名</button>
+  </div>
+
+  <div class="card">
+    <div class="step">③ 在 App 裡訂閱</div>
+    <ol class="big">
+      <li>打開剛裝好的 <b>ntfy</b></li>
+      <li>按右上角 <b>＋</b></li>
+      <li>貼上主題:<b>allen-site-k7x9q2m4v</b></li>
+      <li>伺服器保持 <b>ntfy.sh</b></li>
+      <li>按 <b>Subscribe(訂閱)</b></li>
+    </ol>
+    <p class="note">完成!之後工地一有狀況(闖入、未戴安全帽、軌道侵入、豪雨),手機就會收到含現場照片的告警。</p>
+  </div>
+
+  <div class="card" style="text-align:center">
+    <p class="note">已加入工地 LINE 群組者,重要告警也會自動發到群組。<br>本頁為快速設定即時推播之用。</p>
+  </div>
+</div>
+</body>
+</html>
