@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工地告警推播設定</title>
+<style>
+  body { margin:0; font-family:"Microsoft JhengHei",sans-serif; background:#0e1117; color:#e6edf3;
+         display:flex; justify-content:center; padding:20px; }
+  .box { max-width:420px; width:100%; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:22px; margin-bottom:16px; }
+  h1 { font-size:20px; text-align:center; }
+  .qr { text-align:center; }
+  .qr img { width:220px; background:#fff; padding:12px; border-radius:12px; }
+  .topic { font-family:monospace; font-size:18px; background:#0d1117; border:1px solid #30363d;
+           border-radius:8px; padding:12px; text-align:center; margin:12px 0; word-break:break-all; }
+  ol { line-height:1.9; padding-left:20px; }
+  .store { display:flex; gap:10px; margin-top:10px; }
+  .store a { flex:1; text-align:center; background:#21262d; border:1px solid #30363d; border-radius:8px;
+             padding:10px; color:#e6edf3; text-decoration:none; font-size:14px; }
+  .copy { background:#238636; border:none; color:#fff; border-radius:8px; padding:10px 16px;
+          width:100%; font-size:15px; cursor:pointer; margin-top:6px; }
+  .note { color:#8b949e; font-size:13px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="card">
+    <h1>🏗️ 工地告警推播設定</h1>
+    <p class="note" style="text-align:center">3 步驟,收到工地即時 AI 告警(含現場照片)</p>
+  </div>
+
+  <div class="card qr">
+    <h3>① 安裝 ntfy App</h3>
+    <div class="store">
+      <a href="https://apps.apple.com/app/ntfy/id1625396347" target="_blank">🍎 iOS</a>
+      <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank">🤖 Android</a>
+    </div>
+  </div>
+
+  <div class="card qr">
+    <h3>② 掃描訂閱(或手動加主題)</h3>
+    <img src="/qr.png" alt="QR">
+    <p class="note">用手機相機掃描,或在 ntfy App 按 ➕ 輸入下方主題名</p>
+    <div class="topic" id="topic">{{ topic }}</div>
+    <button class="copy" onclick="navigator.clipboard.writeText('{{ topic }}');this.textContent='✓ 已複製'">複製主題名</button>
+  </div>
+
+  <div class="card">
+    <h3>③ 完成</h3>
+    <ol>
+      <li>打開 ntfy App</li>
+      <li>按右上角 <b>➕</b></li>
+      <li>主題名貼上:<b>{{ topic }}</b></li>
+      <li>伺服器保持 <b>ntfy.sh</b></li>
+      <li>按 <b>訂閱</b></li>
+    </ol>
+    <p class="note">完成後,工地一偵測到狀況(有人闖入、未戴安全帽),你的手機就會收到含現場照片的告警推播。</p>
+  </div>
+</div>
+</body>
+</html>

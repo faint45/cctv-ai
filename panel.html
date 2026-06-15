@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>工地 AI 監控控制台</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+         background:#0e1117; color:#e6edf3; }
+  header { background:#161b22; padding:12px 18px; display:flex; align-items:center;
+           justify-content:space-between; border-bottom:1px solid #30363d; }
+  header h1 { font-size:18px; margin:0; }
+  header .right { display:flex; gap:10px; align-items:center; }
+  .btn { background:#21262d; color:#e6edf3; border:1px solid #30363d; border-radius:6px;
+         padding:8px 12px; cursor:pointer; font-size:14px; }
+  .btn:hover { background:#30363d; }
+  .btn.on { background:#238636; border-color:#2ea043; }
+  .btn.warn { background:#9e2a2a; border-color:#da3633; }
+  .wrap { display:grid; grid-template-columns: 1fr 340px; gap:14px; padding:14px; }
+  @media(max-width:980px){ .wrap{ grid-template-columns:1fr; } }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media(max-width:700px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  .cam { background:#161b22; border:1px solid #30363d; border-radius:8px; overflow:hidden; }
+  .cam .lbl { padding:5px 8px; font-size:13px; display:flex; justify-content:space-between; }
+  .cam img { width:100%; display:block; background:#000; aspect-ratio:16/10; object-fit:cover; }
+  .cam.site .lbl { color:#ffa657; }
+  .cam.dome .lbl { color:#79c0ff; }
+  .side { display:flex; flex-direction:column; gap:14px; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px; }
+  .card h3 { margin:0 0 10px; font-size:15px; }
+  .pad { display:grid; grid-template-columns:repeat(3,56px); grid-gap:8px; justify-content:center; }
+  .pad .btn { height:50px; font-size:18px; }
+  .zoom { display:flex; gap:8px; justify-content:center; margin-top:8px; }
+  .zoom .btn { flex:1; }
+  .presets { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .presets .row { display:flex; gap:6px; }
+  .presets .row span { flex:1; align-self:center; font-size:13px; }
+  .mini { padding:5px 8px; font-size:12px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th,td { text-align:left; padding:5px 6px; border-bottom:1px solid #21262d; }
+  th { color:#8b949e; }
+  .tag { padding:2px 6px; border-radius:4px; font-size:11px; }
+  .tag.helmet { background:#7d3a00; }
+  .tag.intr { background:#5a1e1e; }
+  .tag.dome { background:#1e3a5a; }
+  a { color:#58a6ff; }
+  .qr { text-align:center; }
+  .qr img { width:150px; background:#fff; padding:8px; border-radius:8px; }
+  .topic { font-family:monospace; background:#0d1117; padding:6px; border-radius:5px;
+           border:1px solid #30363d; word-break:break-all; font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏗️ 工地 AI 監控控制台</h1>
+  <div class="right">
+    <span id="detState" style="font-size:13px;color:#8b949e;">偵測:關閉</span>
+    <button class="btn" id="detBtn" onclick="toggleDet()">啟動 AI 偵測</button>
+    <a class="btn" href="/zoneeditor" target="_blank">🚧 軌道警戒區</a>
+    <a class="btn" href="/setup" target="_blank">📱 推播設定 QR</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="grid" id="camGrid"></div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <h3>🎮 球機(D1)控制</h3>
+      <div class="pad">
+        <div></div>
+        <button class="btn" onmousedown="ptz('up')">▲</button>
+        <div></div>
+        <button class="btn" onmousedown="ptz('left')">◀</button>
+        <button class="btn" onmousedown="ptz('stopx')">■</button>
+        <button class="btn" onmousedown="ptz('right')">▶</button>
+        <div></div>
+        <button class="btn" onmousedown="ptz('down')">▼</button>
+        <div></div>
+      </div>
+      <div class="zoom">
+        <button class="btn" onmousedown="ptz('zoomin')">🔍 拉近 +</button>
+        <button class="btn" onmousedown="ptz('zoomout')">拉遠 −</button>
+      </div>
+      <div id="ptzState" style="text-align:center;font-size:12px;color:#8b949e;margin-top:8px;min-height:16px"></div>
+    </div>
+
+    <div class="card">
+      <h3>📢 發送推播訊息</h3>
+      <input id="annTitle" placeholder="標題(可留空)" style="width:100%;margin-bottom:6px;padding:8px;
+        background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;box-sizing:border-box">
+      <textarea id="annMsg" placeholder="輸入要廣播給所有人的訊息..." rows="3" style="width:100%;padding:8px;
+        background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#e6edf3;box-sizing:border-box;resize:vertical"></textarea>
+      <input type="file" id="annPhoto" accept="image/*" style="width:100%;margin-top:6px;font-size:12px;color:#8b949e">
+      <button class="btn" style="width:100%;margin-top:8px;background:#1f6feb;border-color:#388bfd"
+        onclick="sendAnnounce()">📤 發送給所有訂閱者(可附照片)</button>
+      <div id="annState" style="text-align:center;font-size:12px;color:#8b949e;margin-top:6px;min-height:16px"></div>
+    </div>
+
+    <div class="card">
+      <h3>🌦️ 氣象 / 雨量</h3>
+      <div id="weatherBox" style="font-size:13px;line-height:1.7;color:#c9d1d9">讀取中...</div>
+      <button class="btn mini" style="width:100%;margin-top:8px" onclick="syncRain()">📊 更新歷史雨量到 Google Sheet</button>
+      <div id="rainSync" style="font-size:12px;color:#8b949e;margin-top:4px"></div>
+    </div>
+
+    <div class="card">
+      <h3>📍 預設點</h3>
+      <div class="presets" id="presets"></div>
+    </div>
+
+    <div class="card">
+      <h3>🚨 違規紀錄 <button class="btn mini" onclick="loadViol()" style="float:right">刷新</button></h3>
+      <div style="max-height:260px;overflow:auto"><table id="violTbl">
+        <thead><tr><th>時間</th><th>機</th><th>類型</th><th>說明</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </div>
+
+    <div class="card qr">
+      <h3>📱 推播快速設定</h3>
+      <img src="/qr.png" alt="ntfy QR">
+      <p style="font-size:13px">掃 QR 或在 ntfy App 訂閱主題:</p>
+      <div class="topic">{{ topic }}</div>
+      <p><a href="/setup" target="_blank">→ 完整設定說明頁</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const CH = {{ channels|tojson }};
+const SITE = {{ construction|tojson }};
+const names = {1:"D1 球機",2:"CH2 月台",3:"CH3 工地",4:"CH4 工地",5:"CH5 月台",6:"CH6 工地"};
+
+// 攝影機格
+const grid = document.getElementById('camGrid');
+CH.forEach(ch=>{
+  const cls = ch===1 ? 'dome' : (SITE.includes(ch) ? 'site' : '');
+  grid.insertAdjacentHTML('beforeend',
+    `<div class="cam ${cls}"><div class="lbl"><span>${names[ch]}</span><span>CH${ch}</span></div>
+     <img src="/video/${ch}" alt="CH${ch}"></div>`);
+});
+
+// 預設點
+const PRESETS = [["site_ch3","工地CH3"],["site_ch4","工地CH4"],["site_ch6","工地CH6"],["home","待命home"]];
+const pdiv = document.getElementById('presets');
+PRESETS.forEach(([k,label])=>{
+  pdiv.insertAdjacentHTML('beforeend',
+    `<div class="row"><span>${label}</span>
+       <button class="btn mini" onclick="gotoP('${k}')">前往</button>
+       <button class="btn mini" onclick="saveP('${k}')">存</button></div>`);
+});
+
+async function ptz(a){
+  if(a==='stopx') return;
+  const secs = (a==='zoomin'||a==='zoomout') ? 0.8 : 0.7;   // 動久一點看得出來
+  const ps=document.getElementById('ptzState'); ps.textContent='⏳ 球機移動中...';
+  try{
+    const r=await(await fetch('/ptz',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:a,secs})})).json();
+    ps.textContent = r.ok ? '✓ 已送出 '+a : '✗ '+(r.err||'失敗');
+  }catch(e){ ps.textContent='✗ 連線錯誤'; }
+}
+async function saveP(name){
+  if(!confirm(`把球機目前畫面存成「${name}」?`)) return;
+  const r=await(await fetch('/preset/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name})})).json();
+  alert(r.ok?`已儲存 ${name}`:'失敗:'+r.err);
+}
+async function gotoP(name){
+  const r=await(await fetch('/preset/goto',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name})})).json();
+  if(!r.ok) alert('失敗:'+r.err);
+}
+async function sendAnnounce(){
+  const msg=document.getElementById('annMsg').value.trim();
+  const title=document.getElementById('annTitle').value.trim();
+  const photo=document.getElementById('annPhoto').files[0];
+  const st=document.getElementById('annState');
+  if(!msg){ st.textContent='請先輸入訊息'; return; }
+  st.textContent='⏳ 發送中...';
+  try{
+    const fd=new FormData();
+    fd.append('message',msg); fd.append('title',title);
+    if(photo) fd.append('photo',photo);
+    const r=await(await fetch('/announce',{method:'POST',body:fd})).json();
+    if(r.ok){ st.textContent='✓ 已發送給所有訂閱者'+(photo?'(含照片)':'');
+      document.getElementById('annMsg').value=''; document.getElementById('annPhoto').value=''; }
+    else st.textContent='✗ '+(r.err||'失敗');
+  }catch(e){ st.textContent='✗ 連線錯誤'; }
+}
+async function toggleDet(){
+  const st=await(await fetch('/monitor/status')).json();
+  const cmd=st.running?'stop':'start';
+  await fetch('/monitor/'+cmd,{method:'POST'});
+  refreshDet();
+}
+async function refreshDet(){
+  const st=await(await fetch('/monitor/status')).json();
+  const btn=document.getElementById('detBtn'), s=document.getElementById('detState');
+  if(st.running){ btn.textContent='停止 AI 偵測'; btn.classList.add('warn');
+    s.textContent='偵測:執行中 CH'+st.channels.join(','); }
+  else { btn.textContent='啟動 AI 偵測'; btn.classList.remove('warn'); s.textContent='偵測:關閉'; }
+}
+async function loadViol(){
+  const r=await(await fetch('/violations')).json();
+  const tb=document.querySelector('#violTbl tbody'); tb.innerHTML='';
+  r.rows.forEach(row=>{
+    const [t,cam,type,cnt,detail]=row;
+    const cls=type&&type.includes('安全帽')?'helmet':(type&&type.includes('球機')?'dome':'intr');
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td>${(t||'').slice(5)}</td><td>${cam||''}</td>
+       <td><span class="tag ${cls}">${type||''}</span></td><td>${detail||''}</td></tr>`);
+  });
+}
+async function syncRain(){
+  const s=document.getElementById('rainSync'); s.textContent='⏳ 同步中...';
+  try{ const r=await(await fetch('/rainfall/sync',{method:'POST'})).json(); s.textContent=r.ok?'✓ '+r.msg:'失敗'; }
+  catch(e){ s.textContent='✗ 連線錯誤'; }
+}
+async function loadWeather(){
+  const box=document.getElementById('weatherBox');
+  try{
+    const w=await(await fetch('/weather')).json();
+    if(!w.enabled){ box.innerHTML='<span style="color:#8b949e">未設定 CWA 授權碼<br>(config.py 的 CWA_API_KEY)</span>'; return; }
+    let h='';
+    const r=w.rain;
+    if(r){
+      const a=w.alert;
+      const col=a?(a[0]==='stop'?'#ff6b6b':'#ffa657'):'#3fb950';
+      h+=`<div>📍 ${r.station} 站</div>`;
+      h+=`<div>時雨量 <b style="color:${col}">${r.r1h??'-'} mm</b> ・ 10分 ${r.r10??'-'} mm ・ 日累積 ${r.r24h??'-'} mm</div>`;
+      if(a) h+=`<div style="color:${col}">⚠️ ${a[1]}</div>`;
+    }
+    const f=w.forecast;
+    if(f){ h+=`<div style="margin-top:6px">🌡️ ${f.low??'?'}~${f.high??f.temp??'?'}°C ・ ☔ 降雨 ${f.pop??'?'}%</div>`; }
+    if(w.warnings&&w.warnings.length) h+=`<div style="color:#ffa657">🚨 ${w.warnings.join('、')}</div>`;
+    box.innerHTML=h||'無資料';
+  }catch(e){ box.textContent='讀取失敗'; }
+}
+refreshDet(); loadViol(); loadWeather();
+setInterval(loadViol, 8000);
+setInterval(refreshDet, 5000);
+setInterval(loadWeather, 60000);
+</script>
+</body>
+</html>

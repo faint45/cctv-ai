@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cctv-panel",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["webpanel.py"],
+      "port": 8080
+    }
+  ]
+}

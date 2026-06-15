@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>軌道警戒區劃設</title>
+<style>
+  body { margin:0; font-family:"Microsoft JhengHei",sans-serif; background:#0e1117; color:#e6edf3; padding:16px; }
+  h1 { font-size:18px; }
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  select,button { background:#21262d; color:#e6edf3; border:1px solid #30363d; border-radius:6px; padding:8px 12px; font-size:14px; cursor:pointer; }
+  button.save { background:#238636; border-color:#2ea043; }
+  button.clear { background:#9e2a2a; border-color:#da3633; }
+  .wrap { display:inline-block; position:relative; border:1px solid #30363d; }
+  canvas { display:block; max-width:100%; cursor:crosshair; }
+  .hint { color:#8b949e; font-size:13px; margin-top:10px; line-height:1.7; }
+  #status { margin-left:8px; color:#3fb950; }
+</style>
+</head>
+<body>
+<h1>🚧 軌道警戒區劃設</h1>
+<div class="bar">
+  攝影機:
+  <select id="ch">
+    <option value="2">CH2 月台</option>
+    <option value="5">CH5 月台</option>
+    <option value="3">CH3 工地</option>
+    <option value="4">CH4 工地</option>
+    <option value="6">CH6 工地</option>
+  </select>
+  <button onclick="reload()">🔄 重載畫面</button>
+  <button onclick="undo()">↶ 復原一點</button>
+  <button class="clear" onclick="clearPts()">✕ 清除</button>
+  <button class="save" onclick="save()">💾 儲存警戒區</button>
+  <span id="status"></span>
+</div>
+<div class="wrap"><canvas id="cv"></canvas></div>
+<div class="hint">
+  操作:在畫面上<b>依序點擊</b>圈出「軌道區域」(越過月台邊緣的危險範圍)→ 至少 3 點 → 按<b>儲存</b>。<br>
+  人或物的腳底點落入此區就會觸發「軌道侵入警戒」推播。儲存後即時生效。
+</div>
+
+<script>
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const chSel = document.getElementById('ch'), status = document.getElementById('status');
+let img = new Image(), pts = [], scale = 1;
+
+function reload(){
+  const ch = chSel.value;
+  status.textContent = '載入中...';
+  img = new Image();
+  img.onload = ()=>{
+    cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+    loadZone(ch); status.textContent='';
+    draw();
+  };
+  img.onerror = ()=> status.textContent='畫面載入失敗(先確認伺服器有該路影像)';
+  img.src = '/zone/snap/'+ch+'?t='+Date.now();
+}
+async function loadZone(ch){
+  try{ const z=await(await fetch('/zones')).json(); pts = z[ch] ? z[ch].slice() : []; }
+  catch(e){ pts=[]; }
+}
+function draw(){
+  if(img.complete && img.naturalWidth) ctx.drawImage(img,0,0);
+  if(pts.length){
+    ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]);
+    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]);
+    if(pts.length>2) ctx.closePath();
+    ctx.fillStyle='rgba(255,0,0,0.25)'; ctx.fill();
+    ctx.strokeStyle='#ff3b30'; ctx.lineWidth=2; ctx.stroke();
+    pts.forEach(([x,y],i)=>{ ctx.fillStyle='#ffd60a'; ctx.beginPath(); ctx.arc(x,y,5,0,7); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font='12px sans-serif'; ctx.fillText(i+1,x+7,y-7); });
+  }
+}
+cv.addEventListener('click', e=>{
+  const r = cv.getBoundingClientRect();
+  const x = Math.round((e.clientX-r.left) * cv.width / r.width);
+  const y = Math.round((e.clientY-r.top) * cv.height / r.height);
+  pts.push([x,y]); draw();
+});
+function undo(){ pts.pop(); draw(); }
+function clearPts(){ pts=[]; draw(); }
+async function save(){
+  if(pts.length<3){ status.textContent='至少要 3 個點'; status.style.color='#ff6b6b'; return; }
+  const r=await(await fetch('/zone/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ch:parseInt(chSel.value),points:pts})})).json();
+  status.style.color='#3fb950'; status.textContent = r.ok?'✓ 已儲存,即時生效':'儲存失敗';
+}
+chSel.addEventListener('change', reload);
+reload();
+</script>
+</body>
+</html>

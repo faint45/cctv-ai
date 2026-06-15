@@ -1,0 +1,25 @@
+# 機密設定(含 NVR 密碼、CWA 金鑰、LINE token)— 絕不上傳!
+config.py
+
+# 模型權重(大檔,程式會自動下載)
+*.pt
+
+# 產生的資料 / 紀錄 / 截圖
+logs/
+snapshots/
+dataset/
+*.csv
+presets.json
+zones.json
+ntfy_qrcode.png
+
+# 暫存
+__pycache__/
+*.pyc
+*.log
+wp_out.log
+wp_err.log
+
+# 系統
+Thumbs.db
+.DS_Store
