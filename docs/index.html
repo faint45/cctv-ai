@@ -10,56 +10,58 @@
   .box { max-width:440px; width:100%; }
   .card { background:#161b22; border:1px solid #30363d; border-radius:14px; padding:20px; margin-bottom:14px; }
   h1 { font-size:21px; text-align:center; margin:6px 0; }
-  .sub { text-align:center; color:#8b949e; font-size:14px; margin-bottom:4px; }
+  .sub { text-align:center; color:#8b949e; font-size:14px; }
   .step { font-size:15px; font-weight:bold; color:#58a6ff; margin-bottom:8px; }
   .store { display:flex; gap:10px; }
   .store a { flex:1; text-align:center; background:#238636; border-radius:10px; padding:14px;
              color:#fff; text-decoration:none; font-size:15px; font-weight:bold; }
   .store a.ios { background:#0a84ff; }
-  .topic { font-family:monospace; font-size:19px; background:#0d1117; border:1px dashed #3fb950;
-           border-radius:8px; padding:14px; text-align:center; margin:10px 0; word-break:break-all; color:#3fb950; }
-  .copy { width:100%; background:#1f6feb; color:#fff; border:none; border-radius:8px; padding:13px; font-size:15px; cursor:pointer; }
+  .kv { font-family:monospace; font-size:16px; background:#0d1117; border:1px dashed #3fb950;
+        border-radius:8px; padding:12px; text-align:center; margin:8px 0; word-break:break-all; color:#3fb950; }
   ol { line-height:2; padding-left:22px; font-size:15px; }
   .note { color:#8b949e; font-size:13px; line-height:1.6; }
-  .big { font-size:16px; }
+  b.hl { color:#ffd60a; }
 </style>
 </head>
 <body>
 <div class="box">
   <div class="card" style="text-align:center">
     <h1>🏗️ 拔林工地 AI 告警</h1>
-    <p class="sub">3 步驟,手機接收工地即時告警(含現場照片)</p>
+    <p class="sub">手機接收工地即時告警(含現場照片)</p>
   </div>
 
   <div class="card">
     <div class="step">① 下載 ntfy App</div>
     <div class="store">
-      <a class="ios" href="https://apps.apple.com/app/ntfy/id1625396347">🍎 iPhone 下載</a>
-      <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">🤖 Android 下載</a>
+      <a class="ios" href="https://apps.apple.com/app/ntfy/id1625396347">🍎 iPhone</a>
+      <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy">🤖 Android</a>
     </div>
-    <p class="note" style="margin-top:8px">(免費 App,不需註冊帳號)</p>
   </div>
 
   <div class="card">
-    <div class="step">② 複製訂閱主題</div>
-    <div class="topic" id="topic">allen-site-k7x9q2m4v</div>
-    <button class="copy" onclick="navigator.clipboard.writeText('allen-site-k7x9q2m4v');this.textContent='✓ 已複製,請開 ntfy App'">📋 複製主題名</button>
+    <div class="step">② 跟管理員拿你的專屬帳號</div>
+    <p class="note">本系統採帳號管控(才知道誰在收、可隨時管理)。請向管理員索取你的:</p>
+    <div class="kv">帳號:______ / 密碼:______</div>
   </div>
 
   <div class="card">
-    <div class="step">③ 在 App 裡訂閱</div>
-    <ol class="big">
-      <li>打開剛裝好的 <b>ntfy</b></li>
-      <li>按右上角 <b>＋</b></li>
-      <li>貼上主題:<b>allen-site-k7x9q2m4v</b></li>
-      <li>伺服器保持 <b>ntfy.sh</b></li>
+    <div class="step">③ 在 App 加入訂閱</div>
+    <ol>
+      <li>打開 <b>ntfy</b> → 按右上 <b>＋</b></li>
+      <li>主題名輸入:<b class="hl">gongdi</b></li>
+      <li>點 <b>「Use another server」</b>(使用其他伺服器)</li>
+      <li>伺服器輸入:</li>
+    </ol>
+    <div class="kv">https://ntfy.zhe-wei.net</div>
+    <ol start="5">
+      <li>輸入管理員給的<b>帳號 / 密碼</b>登入</li>
       <li>按 <b>Subscribe(訂閱)</b></li>
     </ol>
-    <p class="note">完成!之後工地一有狀況(闖入、未戴安全帽、軌道侵入、豪雨),手機就會收到含現場照片的告警。</p>
+    <p class="note">完成!工地一有狀況(闖入、未戴安全帽、軌道侵入、豪雨),手機就會收到含現場照片的告警。</p>
   </div>
 
   <div class="card" style="text-align:center">
-    <p class="note">已加入工地 LINE 群組者,重要告警也會自動發到群組。<br>本頁為快速設定即時推播之用。</p>
+    <p class="note">重要告警另由工地 LINE 群組發布(管理員手動)。<br>本頁為設定即時推播之用。</p>
   </div>
 </div>
 </body>
